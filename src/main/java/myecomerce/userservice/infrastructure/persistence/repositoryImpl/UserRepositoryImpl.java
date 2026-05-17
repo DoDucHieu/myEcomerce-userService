@@ -22,7 +22,7 @@ public class UserRepositoryImpl implements UserRepository {
     private final UserJpaRepository jpaRepository;
 
     private User toDomain(UserJpaEntity e) {
-        return new User(e.getId(), e.getEmail(), e.getName());
+        return new User(e.getId(), e.getEmail(), e.getName(), e.getPasswordHash());
     }
 
     @Override
@@ -32,6 +32,7 @@ public class UserRepositoryImpl implements UserRepository {
         entity.setId(userId);
         entity.setEmail(user.getEmail());
         entity.setName(user.getName());
+        entity.setPasswordHash(user.getPasswordHash());
         return toDomain(jpaRepository.save(entity));
     }
 

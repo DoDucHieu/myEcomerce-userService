@@ -7,8 +7,9 @@ public class User {
     private UUID id;
     private String email;
     private String name;
+    private String passwordHash;
 
-    public User(UUID id, String email, String name) {
+    public User(UUID id, String email, String name, String passwordHash) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email is required");
         }
@@ -16,30 +17,47 @@ public class User {
         this.id = id;
         this.email = email;
         this.name = name;
+        this.passwordHash = passwordHash;
     }
 
-    public static User create(String email, String name) {
-        return new User(UUID.randomUUID(), email, name);
+    public static User create(String email, String name, String passwordHash) {
+        if (passwordHash == null || passwordHash.isBlank()) {
+            throw new IllegalArgumentException("Password hash is required");
+        }
+
+        return new User(UUID.randomUUID(), email, name, passwordHash);
     }
 
     public UUID getId() {
         return id;
     }
 
-    public String getEmail() {
-        return email;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getEmail() {
+        return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public User update(String email, String name) {

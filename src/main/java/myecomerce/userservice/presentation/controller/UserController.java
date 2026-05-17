@@ -49,7 +49,7 @@ public class UserController {
     {
         String requestId = RequestContext.getRequestId();
         String code = ErrorCode.SUCCESS;
-        var command = new CreateUserCommand(request.email(), request.name());
+        var command = new CreateUserCommand(request.email(), request.name(), request.passwordHash());
         var result = userCommandService.createUser(command);
 
         return ApiResponse.success("User created successfully", code, requestId, requestId, result, httpRequest.getRequestURI());

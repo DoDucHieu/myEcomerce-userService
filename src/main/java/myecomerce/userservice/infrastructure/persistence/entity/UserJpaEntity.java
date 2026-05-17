@@ -24,6 +24,9 @@ public class UserJpaEntity {
     @Column
     private String name;
 
+    @Column(nullable = false)
+    private String passwordHash;
+
     public UUID getId() {
         return id;
     }
@@ -46,5 +49,13 @@ public class UserJpaEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 }

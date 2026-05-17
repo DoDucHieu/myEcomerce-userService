@@ -27,7 +27,7 @@ public class UserCommandServiceImpl implements UserCommandService {
             throw new EmailAlreadyExistsException();
         });
 
-        User newUser = User.create(req.email(), req.name());
+        User newUser = User.create(req.email(), req.name(), req.passwordHash());
         User saved = userRepository.save(newUser);
         return new CreateUserResponse(
                 saved.getId(),
