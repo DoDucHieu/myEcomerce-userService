@@ -1,4 +1,4 @@
-package myecomerce.userservice.presentation.dto;
+package myecomerce.userservice.presentation.dto.user;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

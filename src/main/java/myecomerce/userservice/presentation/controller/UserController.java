@@ -26,9 +26,9 @@ import myecomerce.userservice.application.userService.service.UserQueryService;
 import myecomerce.userservice.presentation.apiResponse.ApiResponse;
 import myecomerce.userservice.presentation.apiResponse.ErrorCode;
 import myecomerce.userservice.presentation.apiResponse.RequestContext;
-import myecomerce.userservice.presentation.dto.CreateUserRequest;
-import myecomerce.userservice.presentation.dto.GetUsersRequest;
-import myecomerce.userservice.presentation.dto.UpdateUserRequest;
+import myecomerce.userservice.presentation.dto.user.CreateUserRequest;
+import myecomerce.userservice.presentation.dto.user.GetUsersRequest;
+import myecomerce.userservice.presentation.dto.user.UpdateUserRequest;
 
 @RestController
 @RequestMapping("/users")

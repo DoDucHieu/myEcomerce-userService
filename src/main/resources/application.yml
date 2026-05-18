@@ -18,3 +18,5 @@ spring:
         jdbc:
           time_zone: UTC
         format_sql: true
+jwt:
+  secret: mysupersecretkeymysupersecretkey88888888

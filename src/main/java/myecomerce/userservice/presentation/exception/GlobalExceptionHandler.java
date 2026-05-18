@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.servlet.http.HttpServletRequest;
 import myecomerce.userservice.application.userService.exception.EmailAlreadyExistsException;
+import myecomerce.userservice.application.userService.exception.InvalidEmailOrPasswordException;
 import myecomerce.userservice.application.userService.exception.UserNotFoundException;
 import myecomerce.userservice.presentation.apiResponse.ApiResponse;
 import myecomerce.userservice.presentation.apiResponse.ErrorCode;
@@ -52,6 +53,15 @@ public class GlobalExceptionHandler {
         String requestId = RequestContext.getRequestId();
         List<ErrorDetail> errors = List.of(new ErrorDetail("email", ex.getMessage()));
         return ApiResponse.error(ex.getMessage(), ErrorCode.EMAIL_ALREADY_EXISTS, requestId, requestId, errors, req.getRequestURI());
+    }
+
+    // Invalid email or password
+    @ExceptionHandler(InvalidEmailOrPasswordException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<Void> handleInvalidEmailOrPassword(InvalidEmailOrPasswordException ex, HttpServletRequest req) {
+        String requestId = RequestContext.getRequestId();
+        List<ErrorDetail> errors = List.of(new ErrorDetail("Email or Password", ex.getMessage()));
+        return ApiResponse.error(ex.getMessage(), ErrorCode.INVALID_EMAIL_OR_PASSWORD, requestId, requestId, errors, req.getRequestURI());
     }
 
     // fallback
