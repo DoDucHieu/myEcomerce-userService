@@ -1,5 +1,6 @@
 package myecomerce.userservice.application.userService.service;
 
+import myecomerce.userservice.application.userService.dto.GetMeResponse;
 import myecomerce.userservice.application.userService.dto.PaginationResponse;
 import myecomerce.userservice.application.userService.dto.UserResponse;
 import myecomerce.userservice.application.userService.query.GetUserByIdQuery;
@@ -9,4 +10,6 @@ public interface UserQueryService {
     UserResponse getUserById(GetUserByIdQuery query);
 
     PaginationResponse<UserResponse> getUsers(GetUsersQuery query);
+
+    GetMeResponse getMe(String query);
 }

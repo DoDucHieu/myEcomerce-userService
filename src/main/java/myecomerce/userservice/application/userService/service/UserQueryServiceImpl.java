@@ -2,6 +2,7 @@ package myecomerce.userservice.application.userService.service;
 
 import java.util.UUID;
 
+import myecomerce.userservice.application.userService.dto.GetMeResponse;
 import myecomerce.userservice.application.userService.dto.PaginationResponse;
 import myecomerce.userservice.application.userService.dto.UserResponse;
 import myecomerce.userservice.application.userService.exception.UserNotFoundException;
@@ -49,6 +50,15 @@ public class UserQueryServiceImpl implements UserQueryService{
                 pagination.size(),
                 data.size()
         );
+    }
+
+
+    @Override
+    public GetMeResponse getMe(String id) {
+        User user = userRepository.findById(UUID.fromString(id))
+        .orElseThrow(UserNotFoundException::new);
+
+        return userMapper.toGetMeResponse(user);
     }
     
 }

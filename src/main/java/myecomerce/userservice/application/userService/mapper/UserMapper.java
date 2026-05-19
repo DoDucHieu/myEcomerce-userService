@@ -1,6 +1,7 @@
 package myecomerce.userservice.application.userService.mapper;
 
 import myecomerce.userservice.application.userService.dto.CreateUserResponse;
+import myecomerce.userservice.application.userService.dto.GetMeResponse;
 import myecomerce.userservice.application.userService.dto.UpdateUserResponse;
 import myecomerce.userservice.application.userService.dto.UserResponse;
 import myecomerce.userservice.domain.model.User;
@@ -11,4 +12,6 @@ public interface UserMapper {
     UpdateUserResponse toUpdateUserResponse(User user);
 
     UserResponse toUserResponse(User user);
+
+    GetMeResponse toGetMeResponse(User user);
 }

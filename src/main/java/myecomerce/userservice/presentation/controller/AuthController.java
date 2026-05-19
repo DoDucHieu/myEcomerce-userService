@@ -34,7 +34,7 @@ public class AuthController {
     public ApiResponse<RegisterResponse> register(@Valid @RequestBody RegisterRequest req, HttpServletRequest httpRequest) {
         String requestId = RequestContext.getRequestId();
         String code = ErrorCode.SUCCESS;
-        RegisterCommand command = new RegisterCommand(req.email(), req.name(), req.password());
+        RegisterCommand command = req.toRegisterCommand();
         RegisterResponse result = authService.register(command);
         return ApiResponse.success("User registered successfully", code, requestId, requestId, result, httpRequest.getRequestURI());
     }
@@ -44,10 +44,7 @@ public class AuthController {
     public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         String requestId = RequestContext.getRequestId();
         String code = ErrorCode.SUCCESS;
-        LoginCommand command = new LoginCommand(
-                request.email(),
-                request.password()
-        );
+        LoginCommand command = request.toLoginCommand();
 
         LoginResponse res = authService.login(command);
 

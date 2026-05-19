@@ -1,6 +1,7 @@
 package myecomerce.userservice.presentation.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import jakarta.validation.Valid;
 import myecomerce.userservice.application.userService.command.CreateUserCommand;
 import myecomerce.userservice.application.userService.command.UpdateUserCommand;
 import myecomerce.userservice.application.userService.dto.CreateUserResponse;
+import myecomerce.userservice.application.userService.dto.GetMeResponse;
 import myecomerce.userservice.application.userService.dto.PaginationResponse;
 import myecomerce.userservice.application.userService.dto.UpdateUserResponse;
 import myecomerce.userservice.application.userService.dto.UserResponse;
@@ -92,5 +94,20 @@ public class UserController {
         GetUserByIdQuery query = new GetUserByIdQuery(id);
         UserResponse result = userQueryService.getUserById(query);
         return ApiResponse.success("User fetched successfully", code, requestId, requestId, result, httpRequest.getRequestURI());
+    }
+
+    @GetMapping("/me")
+    public ApiResponse<GetMeResponse>
+    getCurrentUser(
+            Authentication authentication, HttpServletRequest httpRequest
+    ) {
+        String requestId = RequestContext.getRequestId();
+        String code = ErrorCode.SUCCESS;
+        String userId = (String) authentication.getPrincipal();
+    
+        GetMeResponse res = userQueryService.getMe(userId);
+
+        return ApiResponse.success("Me fetched successfully", code, requestId, requestId, res, httpRequest.getRequestURI());
+
     }
 }

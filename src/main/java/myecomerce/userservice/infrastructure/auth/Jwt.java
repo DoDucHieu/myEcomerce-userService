@@ -40,4 +40,28 @@ public class Jwt implements TokenService{
                 .signWith(secretKey)
                 .compact();
     }
+
+    @Override
+    public boolean validate(String token) {
+        try {
+                Jwts.parser()
+                        .verifyWith(secretKey)
+                        .build()
+                        .parseSignedClaims(token);
+
+                return true;
+        } catch (Exception e) {
+                return false;
+        }
+    }
+
+    @Override
+    public String extractUserId(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
 }

@@ -3,6 +3,7 @@ package myecomerce.userservice.presentation.dto.auth;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import myecomerce.userservice.application.authService.command.RegisterCommand;
 
 public record RegisterRequest (
     @NotBlank(message = "Email is required")
@@ -15,4 +16,8 @@ public record RegisterRequest (
 
     @NotBlank(message = "Name is required")
     String name
-){}
+){
+    public RegisterCommand toRegisterCommand () {
+        return new RegisterCommand(email, name, password);
+    }
+}
