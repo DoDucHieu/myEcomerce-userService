@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.servlet.http.HttpServletRequest;
+import myecomerce.userservice.application.authService.exception.InvalidTokenException;
 import myecomerce.userservice.application.userService.exception.EmailAlreadyExistsException;
 import myecomerce.userservice.application.userService.exception.InvalidEmailOrPasswordException;
 import myecomerce.userservice.application.userService.exception.UserNotFoundException;
@@ -62,6 +63,15 @@ public class GlobalExceptionHandler {
         String requestId = RequestContext.getRequestId();
         List<ErrorDetail> errors = List.of(new ErrorDetail("Email or Password", ex.getMessage()));
         return ApiResponse.error(ex.getMessage(), ErrorCode.INVALID_EMAIL_OR_PASSWORD, requestId, requestId, errors, req.getRequestURI());
+    }
+
+    // Invalid token
+    @ExceptionHandler(InvalidTokenException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<Void> handleInvalidToken(InvalidTokenException ex, HttpServletRequest req) {
+        String requestId = RequestContext.getRequestId();
+        List<ErrorDetail> errors = List.of(new ErrorDetail("Token", ex.getMessage()));
+        return ApiResponse.error(ex.getMessage(), ErrorCode.INVALID_TOKEN, requestId, requestId, errors, req.getRequestURI());
     }
 
     // fallback

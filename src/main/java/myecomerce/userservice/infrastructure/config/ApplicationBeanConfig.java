@@ -11,6 +11,7 @@ import myecomerce.userservice.application.userService.service.UserCommandService
 import myecomerce.userservice.application.userService.service.UserCommandServiceImpl;
 import myecomerce.userservice.application.userService.service.UserQueryService;
 import myecomerce.userservice.application.userService.service.UserQueryServiceImpl;
+import myecomerce.userservice.domain.repository.RefreshTokenRepository;
 import myecomerce.userservice.domain.repository.UserRepository;
 import myecomerce.userservice.infrastructure.mapper.IUserMapper;
 
@@ -28,7 +29,7 @@ public class ApplicationBeanConfig {
     }
 
     @Bean
-    public AuthService authService(UserRepository userRepository, PasswordHasher passwordHasher, TokenService tokenService) {
-        return new AuthServiceImpl(userRepository, passwordHasher, tokenService);
+    public AuthService authService(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository, PasswordHasher passwordHasher, TokenService tokenService) {
+        return new AuthServiceImpl(userRepository, refreshTokenRepository, passwordHasher, tokenService);
     }
 }

@@ -10,4 +10,5 @@ public class ErrorCode {
     public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
     public static final String EMAIL_ALREADY_EXISTS = "EMAIL_ALREADY_EXISTS";
     public static final String INVALID_EMAIL_OR_PASSWORD = "INVALID_EMAIL_OR_PASSWORD";
+    public static final String INVALID_TOKEN = "INVALID_TOKEN";
 }

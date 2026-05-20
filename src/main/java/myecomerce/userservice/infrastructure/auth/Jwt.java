@@ -64,4 +64,26 @@ public class Jwt implements TokenService{
                 .getPayload()
                 .getSubject();
     }
+
+    @Override
+    public String generateRefreshToken(String userId) {
+        return Jwts.builder()
+
+        .subject(userId)
+
+        .expiration(
+                new Date(
+                        System.currentTimeMillis()
+                                + 30L
+                                * 24
+                                * 60
+                                * 60
+                                * 1000
+                )
+        )
+
+        .signWith(secretKey)
+
+        .compact();
+    }
 }
