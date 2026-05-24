@@ -1,6 +1,7 @@
 package myecomerce.userservice.infrastructure.auth;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -85,5 +86,22 @@ public class Jwt implements TokenService{
         .signWith(secretKey)
 
         .compact();
+    }
+
+    @Override
+    public Instant extractExpiration(String token) {
+        Date exp =
+            Jwts.parser()
+                    .verifyWith(
+                            secretKey
+                    )
+                    .build()
+                    .parseSignedClaims(
+                            token
+                    )
+                    .getPayload()
+                    .getExpiration();
+
+        return exp.toInstant();
     }
 }

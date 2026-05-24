@@ -11,14 +11,19 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import myecomerce.userservice.application.authService.exception.UnauthorizedException;
 import myecomerce.userservice.application.authService.service.TokenService;
+import myecomerce.userservice.domain.repository.RevokedTokenRepository;
+import myecomerce.userservice.presentation.apiResponse.ErrorCode;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter{
     private final TokenService tokenService;
+    private final RevokedTokenRepository revokedTokenRepository;
 
-    public JwtAuthFilter(TokenService tokenService) {
+    public JwtAuthFilter(TokenService tokenService, RevokedTokenRepository revokedTokenRepository) {
         this.tokenService = tokenService;
+        this.revokedTokenRepository = revokedTokenRepository;
     }
 
     @Override
@@ -29,14 +34,22 @@ public class JwtAuthFilter extends OncePerRequestFilter{
         if (header != null && header.startsWith("Bearer ")) {
 
             String token = header.substring(7);
-                    if (tokenService.validate(token)) {
-                        String userId = tokenService.extractUserId(token);
 
-                        var auth = new UsernamePasswordAuthenticationToken(userId,null,null);
+            var tokenValid = tokenService.validate(token);
 
-                        SecurityContextHolder.getContext().setAuthentication(auth);
-                    }
+            var tokenRevoked = revokedTokenRepository.exists(token);
+
+            if(!tokenValid || tokenRevoked){
+                throw new UnauthorizedException();
+            }
+                    
+            String userId = tokenService.extractUserId(token);
+
+            var auth = new UsernamePasswordAuthenticationToken(userId,null,null);
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
         }
+
         filterChain.doFilter(
                 request,
                 response

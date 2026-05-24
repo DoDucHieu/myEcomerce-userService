@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.servlet.http.HttpServletRequest;
 import myecomerce.userservice.application.authService.exception.InvalidTokenException;
+import myecomerce.userservice.application.authService.exception.UnauthorizedException;
 import myecomerce.userservice.application.userService.exception.EmailAlreadyExistsException;
 import myecomerce.userservice.application.userService.exception.InvalidEmailOrPasswordException;
 import myecomerce.userservice.application.userService.exception.UserNotFoundException;
@@ -72,6 +73,15 @@ public class GlobalExceptionHandler {
         String requestId = RequestContext.getRequestId();
         List<ErrorDetail> errors = List.of(new ErrorDetail("Token", ex.getMessage()));
         return ApiResponse.error(ex.getMessage(), ErrorCode.INVALID_TOKEN, requestId, requestId, errors, req.getRequestURI());
+    }
+
+    // Unauthorized
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiResponse<Void> handleUnauthorized(UnauthorizedException ex, HttpServletRequest req) {
+        String requestId = RequestContext.getRequestId();
+        List<ErrorDetail> errors = List.of(new ErrorDetail("Unauthorized", ex.getMessage()));
+        return ApiResponse.error(ex.getMessage(), ErrorCode.UNAUTHORIZED, requestId, requestId, errors, req.getRequestURI());
     }
 
     // fallback

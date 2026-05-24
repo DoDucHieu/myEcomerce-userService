@@ -1,8 +1,11 @@
 package myecomerce.userservice.presentation.controller;
 
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import myecomerce.userservice.application.authService.command.LoginCommand;
+import myecomerce.userservice.application.authService.command.LogoutCommand;
 import myecomerce.userservice.application.authService.command.RegisterCommand;
 import myecomerce.userservice.application.authService.dto.LoginResponse;
 import myecomerce.userservice.application.authService.dto.RefreshTokenResponse;
@@ -19,6 +23,7 @@ import myecomerce.userservice.presentation.apiResponse.ApiResponse;
 import myecomerce.userservice.presentation.apiResponse.ErrorCode;
 import myecomerce.userservice.presentation.apiResponse.RequestContext;
 import myecomerce.userservice.presentation.dto.auth.LoginRequest;
+import myecomerce.userservice.presentation.dto.auth.LogoutRequest;
 import myecomerce.userservice.presentation.dto.auth.RefreshTokenRequest;
 import myecomerce.userservice.presentation.dto.auth.RegisterRequest;
 
@@ -65,4 +70,45 @@ public class AuthController {
         RefreshTokenResponse res = authService.refresh(request.refreshToken());
         return ApiResponse.success("Refresh token successfully", code, requestId, requestId, res, httpRequest.getRequestURI());
     }
-}
+
+    @PostMapping(
+    "/logout"
+    )
+    @ResponseStatus(
+        HttpStatus.NO_CONTENT
+    )
+    public ApiResponse<Boolean> logout(
+            @RequestHeader(
+                    "Authorization"
+            )
+            String authorization,
+
+            @RequestBody
+            LogoutRequest req,
+            HttpServletRequest httpRequest
+    ) {
+        String requestId = RequestContext.getRequestId();
+        String code = ErrorCode.SUCCESS;
+
+            String accessToken =
+                    authorization
+                            .replace(
+                                    "Bearer ",
+                                    ""
+                            );
+
+            authService.logout(
+
+                    new LogoutCommand(
+
+                            accessToken,
+
+                            req.refreshToken()
+
+                    )
+
+            );
+
+            return ApiResponse.success("Revoked token successfully", code, requestId, requestId, true, httpRequest.getRequestURI());
+        }
+    }

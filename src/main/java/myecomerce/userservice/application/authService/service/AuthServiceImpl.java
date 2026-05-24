@@ -4,7 +4,9 @@ import java.time.Instant;
 import java.util.UUID;
 import java.time.Duration;
 
+import myecomerce.userservice.application.annotationCustom.CommandUseCase;
 import myecomerce.userservice.application.authService.command.LoginCommand;
+import myecomerce.userservice.application.authService.command.LogoutCommand;
 import myecomerce.userservice.application.authService.command.RegisterCommand;
 import myecomerce.userservice.application.authService.dto.LoginResponse;
 import myecomerce.userservice.application.authService.dto.RefreshTokenResponse;
@@ -16,21 +18,28 @@ import myecomerce.userservice.application.userService.exception.UserNotFoundExce
 import myecomerce.userservice.domain.model.RefreshToken;
 import myecomerce.userservice.domain.model.User;
 import myecomerce.userservice.domain.repository.RefreshTokenRepository;
+import myecomerce.userservice.domain.repository.RevokedTokenRepository;
 import myecomerce.userservice.domain.repository.UserRepository;
 
+@CommandUseCase
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final RevokedTokenRepository revokedTokenRepository;
     private final PasswordHasher passwordHasher;
     private final TokenService tokenService;
 
-    public AuthServiceImpl(UserRepository userRepository,
+    public AuthServiceImpl(
+        UserRepository userRepository,
         RefreshTokenRepository refreshTokenRepository,
+        RevokedTokenRepository revokedTokenRepository,
         PasswordHasher passwordHasher,
-        TokenService tokenService) {
+        TokenService tokenService
+    ) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.revokedTokenRepository = revokedTokenRepository;
         this.passwordHasher = passwordHasher;
         this.tokenService = tokenService;
     }
@@ -97,6 +106,7 @@ public class AuthServiceImpl implements AuthService {
         if (
                 stored.expired()
         ) {
+            refreshTokenRepository.delete(refreshToken);
             throw new InvalidTokenException();
         }
 
@@ -117,8 +127,35 @@ public class AuthServiceImpl implements AuthService {
                                 user.getEmail()
                         );
 
+        String newRefreshToken = tokenService.generateRefreshToken(user.getId().toString());
+
+        refreshTokenRepository.delete(refreshToken);
+
+        refreshTokenRepository.save(new RefreshToken(
+
+            UUID.randomUUID(),
+
+            user.getId(),
+
+            newRefreshToken,
+
+            Instant.now()
+            .plus(Duration.ofDays(30))));;
+
         return new RefreshTokenResponse(
-                accessToken
+                accessToken,
+                newRefreshToken
+        );
+    }
+
+    @Override
+    public void logout(LogoutCommand command) {
+        revokedTokenRepository.save(
+                command.accessToken()
+        );
+
+        refreshTokenRepository.delete(
+                command.refreshToken()
         );
     }
 }
