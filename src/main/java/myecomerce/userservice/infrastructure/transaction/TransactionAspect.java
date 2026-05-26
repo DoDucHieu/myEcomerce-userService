@@ -25,7 +25,9 @@ public class TransactionAspect {
                     } catch (
                             Throwable e
                     ) {
-
+                        if (e instanceof RuntimeException re) {
+                                        throw re;
+                        }
                         throw new RuntimeException(
                                 e
                         );

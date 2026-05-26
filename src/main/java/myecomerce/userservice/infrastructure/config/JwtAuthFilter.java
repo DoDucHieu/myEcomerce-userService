@@ -2,10 +2,12 @@ package myecomerce.userservice.infrastructure.config;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,45 +16,57 @@ import jakarta.servlet.http.HttpServletResponse;
 import myecomerce.userservice.application.authService.exception.UnauthorizedException;
 import myecomerce.userservice.application.authService.service.TokenService;
 import myecomerce.userservice.domain.repository.RevokedTokenRepository;
-import myecomerce.userservice.presentation.apiResponse.ErrorCode;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter{
+    private final HandlerExceptionResolver resolver;
     private final TokenService tokenService;
     private final RevokedTokenRepository revokedTokenRepository;
 
-    public JwtAuthFilter(TokenService tokenService, RevokedTokenRepository revokedTokenRepository) {
+    public JwtAuthFilter(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver, TokenService tokenService, RevokedTokenRepository revokedTokenRepository) {
+        this.resolver = resolver;
         this.tokenService = tokenService;
         this.revokedTokenRepository = revokedTokenRepository;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        String header = request.getHeader("Authorization");
-        
-        if (header != null && header.startsWith("Bearer ")) {
+        throws ServletException, IOException {
+        try{
 
-            String token = header.substring(7);
+            String header = request.getHeader("Authorization");
+            
+            if (header != null && header.startsWith("Bearer ")) {
 
-            var tokenValid = tokenService.validate(token);
+                String token = header.substring(7);
 
-            var tokenRevoked = revokedTokenRepository.exists(token);
+                var tokenValid = tokenService.validate(token);
 
-            if(!tokenValid || tokenRevoked){
-                throw new UnauthorizedException();
+                var tokenRevoked = revokedTokenRepository.exists(token);
+
+                if(!tokenValid || tokenRevoked){
+                    throw new UnauthorizedException();
+                }
+                        
+                String userId = tokenService.extractUserId(token);
+
+                var auth = new UsernamePasswordAuthenticationToken(userId,null,null);
+
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
-                    
-            String userId = tokenService.extractUserId(token);
 
-            var auth = new UsernamePasswordAuthenticationToken(userId,null,null);
-
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            filterChain.doFilter(
+                    request,
+                    response
+            );
         }
-
-        filterChain.doFilter(
+        catch (Exception ex) {
+            resolver.resolveException(
                 request,
-                response
-        );
+                response,
+                null,   
+                ex
+            );
+        }
     }
 }
