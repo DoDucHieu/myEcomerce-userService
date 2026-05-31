@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import myecomerce.userservice.domain.model.UserRole;
 
 @Entity
 @Table(
@@ -26,6 +27,9 @@ public class UserJpaEntity {
 
     @Column(nullable = false)
     private String passwordHash;
+
+    @Column(nullable = false)
+    private UserRole role;
 
     public UUID getId() {
         return id;
@@ -57,5 +61,13 @@ public class UserJpaEntity {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public UserRole getRole(){
+        return role;
+    }
+
+    public void setRole(UserRole role){
+        this.role = role;
     }
 }

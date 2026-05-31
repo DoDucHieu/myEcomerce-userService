@@ -8,8 +8,9 @@ public class User {
     private String email;
     private String name;
     private String passwordHash;
+    private UserRole role;
 
-    public User(UUID id, String email, String name, String passwordHash) {
+    public User(UUID id, String email, String name, String passwordHash, UserRole role) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email is required");
         }
@@ -18,6 +19,7 @@ public class User {
         this.email = email;
         this.name = name;
         this.passwordHash = passwordHash;
+        this.role = role;
     }
 
     public static User create(String email, String name, String passwordHash) {
@@ -25,7 +27,7 @@ public class User {
             throw new IllegalArgumentException("Password hash is required");
         }
 
-        return new User(UUID.randomUUID(), email, name, passwordHash);
+        return new User(UUID.randomUUID(), email, name, passwordHash, UserRole.USER);
     }
 
     public UUID getId() {
@@ -58,6 +60,14 @@ public class User {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public UserRole getRole(){
+        return this.role;
+    }
+
+    public void setRole(UserRole role){
+        this.role = role;
     }
 
     public User update(String email, String name) {

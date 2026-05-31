@@ -1,43 +1,50 @@
-package myecomerce.userservice.infrastructure.config;
+    package myecomerce.userservice.infrastructure.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+    import org.springframework.context.annotation.Bean;
+    import org.springframework.context.annotation.Configuration;
+    import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+    import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+    import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+    import org.springframework.security.crypto.password.PasswordEncoder;
+    import org.springframework.security.web.SecurityFilterChain;
+    import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration
-public class SercurityConfig {
-    private final JwtAuthFilter jwtAuthFilter;
+    @Configuration
+    @EnableMethodSecurity
+    public class SercurityConfig {
+        private final JwtAuthFilter jwtAuthFilter;
+        private final CustomAccessDeniedHandler accessDeniedHandler;
 
-    public SercurityConfig(JwtAuthFilter jwtAuthFilter) {
-        this.jwtAuthFilter = jwtAuthFilter;
+        public SercurityConfig(JwtAuthFilter jwtAuthFilter, CustomAccessDeniedHandler accessDeniedHandler) {
+            this.jwtAuthFilter = jwtAuthFilter;
+            this.accessDeniedHandler = accessDeniedHandler;
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
+        }
+
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http)
+                throws Exception {
+
+            http
+                    .csrf(csrf -> csrf.disable())
+                    .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(accessDeniedHandler)
+    )
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers("/auth/login",
+                        "/auth/register",
+                        "/auth/refresh").permitAll()
+                            .anyRequest().authenticated())
+                    .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                    );
+                    
+
+            return http.build();
+        }
     }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
-
-        http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login",
-                    "/auth/register",
-                    "/auth/refresh").permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(
-                    jwtAuthFilter,
-                    UsernamePasswordAuthenticationFilter.class
-                );
-                
-
-        return http.build();
-    }
-}

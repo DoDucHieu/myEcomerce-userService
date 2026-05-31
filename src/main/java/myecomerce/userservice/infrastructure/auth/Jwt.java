@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import myecomerce.userservice.application.authService.service.TokenService;
+import myecomerce.userservice.domain.model.UserRole;
 
 @Component
 public class Jwt implements TokenService{
@@ -28,14 +29,16 @@ public class Jwt implements TokenService{
     @Override
     public String generateAccessToken(
             String userId,
-            String email
-    ) {
+            String email,
+            UserRole role
+    ) { 
 
         long now = System.currentTimeMillis();
 
         return Jwts.builder()
                 .subject(userId)
                 .claim("email", email)
+                .claim("role", role.name())
                 .issuedAt(new Date(now))
                 .expiration(new Date(now + 1000 * 60 * 60))
                 .signWith(secretKey)
@@ -103,5 +106,16 @@ public class Jwt implements TokenService{
                     .getExpiration();
 
         return exp.toInstant();
+    }
+
+    @Override
+    public UserRole extractRole(String token) {
+        String role = Jwts.parser()
+            .verifyWith(secretKey)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload()
+            .get("role", String.class);
+        return UserRole.valueOf(role);
     }
 }

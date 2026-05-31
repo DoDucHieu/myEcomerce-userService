@@ -1,9 +1,11 @@
 package myecomerce.userservice.infrastructure.config;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -15,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import myecomerce.userservice.application.authService.exception.UnauthorizedException;
 import myecomerce.userservice.application.authService.service.TokenService;
+import myecomerce.userservice.domain.model.UserRole;
 import myecomerce.userservice.domain.repository.RevokedTokenRepository;
 
 @Component
@@ -49,8 +52,15 @@ public class JwtAuthFilter extends OncePerRequestFilter{
                 }
                         
                 String userId = tokenService.extractUserId(token);
+                UserRole role = tokenService.extractRole(token);
 
-                var auth = new UsernamePasswordAuthenticationToken(userId,null,null);
+                var authorities = List.of(
+                        new SimpleGrantedAuthority(
+                                "ROLE_" + role.name()
+                        )
+                );
+
+                var auth = new UsernamePasswordAuthenticationToken(userId, null, authorities);
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }

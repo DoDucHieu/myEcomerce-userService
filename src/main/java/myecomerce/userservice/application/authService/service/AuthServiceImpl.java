@@ -57,7 +57,8 @@ public class AuthServiceImpl implements AuthService {
         return new RegisterResponse(
                 saved.getId().toString(),
                 saved.getEmail(),
-                saved.getName());
+                saved.getName(),
+                saved.getRole());
     }
 
     @Override
@@ -76,7 +77,8 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken = tokenService.generateAccessToken(
             user.getId().toString(),
-            user.getEmail()
+            user.getEmail(),
+            user.getRole()
         );
 
         String refreshToken = tokenService.generateRefreshToken(user.getId().toString());
@@ -124,7 +126,8 @@ public class AuthServiceImpl implements AuthService {
                                 user.getId()
                                         .toString(),
 
-                                user.getEmail()
+                                user.getEmail(),
+                                user.getRole()
                         );
 
         String newRefreshToken = tokenService.generateRefreshToken(user.getId().toString());
