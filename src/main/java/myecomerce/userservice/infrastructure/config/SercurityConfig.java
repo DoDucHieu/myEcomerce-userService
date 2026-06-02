@@ -13,11 +13,9 @@
     @EnableMethodSecurity
     public class SercurityConfig {
         private final JwtAuthFilter jwtAuthFilter;
-        private final CustomAccessDeniedHandler accessDeniedHandler;
 
-        public SercurityConfig(JwtAuthFilter jwtAuthFilter, CustomAccessDeniedHandler accessDeniedHandler) {
+        public SercurityConfig(JwtAuthFilter jwtAuthFilter) {
             this.jwtAuthFilter = jwtAuthFilter;
-            this.accessDeniedHandler = accessDeniedHandler;
         }
 
         @Bean
@@ -31,9 +29,6 @@
 
             http
                     .csrf(csrf -> csrf.disable())
-                    .exceptionHandling(ex -> ex
-                        .accessDeniedHandler(accessDeniedHandler)
-    )
                     .authorizeHttpRequests(auth -> auth
                             .requestMatchers("/auth/login",
                         "/auth/register",

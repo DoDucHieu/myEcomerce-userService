@@ -35,7 +35,6 @@ import myecomerce.userservice.presentation.dto.user.UpdateUserRequest;
 
 @RestController
 @RequestMapping("/users")
-@PreAuthorize("hasRole('ADMIN')")
 public class UserController {
 
     private final UserCommandService userCommandService;
@@ -46,6 +45,7 @@ public class UserController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CreateUserResponse> createUser(
         @Valid @RequestBody CreateUserRequest request,
@@ -59,20 +59,23 @@ public class UserController {
         return ApiResponse.success("User created successfully", code, requestId, requestId, result, httpRequest.getRequestURI());
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<UpdateUserResponse> updateUser(
         @Valid @RequestBody UpdateUserRequest req,
+        @PathVariable String id,
         HttpServletRequest httpRequest) 
     {
         String requestId = RequestContext.getRequestId();
         String code = ErrorCode.SUCCESS;
-        var command = new UpdateUserCommand(req.id(), req.email(), req.name()); 
+        var command = new UpdateUserCommand(id, req.email(), req.name()); 
         var result = userCommandService.updateUser(command);
         return ApiResponse.success("User updated successfully", code, requestId, requestId, result, httpRequest.getRequestURI());
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<PaginationResponse<UserResponse>> getUsers(
         @Valid @ModelAttribute GetUsersRequest request,
@@ -86,6 +89,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<UserResponse> getUserById(
         @PathVariable String id,
@@ -99,6 +103,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<GetMeResponse>
     getCurrentUser(
             Authentication authentication, HttpServletRequest httpRequest

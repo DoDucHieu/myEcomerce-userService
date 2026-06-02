@@ -12,4 +12,5 @@ public class ErrorCode {
     public static final String INVALID_EMAIL_OR_PASSWORD = "INVALID_EMAIL_OR_PASSWORD";
     public static final String INVALID_TOKEN = "INVALID_TOKEN";
     public static final String UNAUTHORIZED = "UNAUTHORIZED";
+    public static final String FORBIDDEN = "FORBIDDEN";
 }
