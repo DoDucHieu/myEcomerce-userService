@@ -2,6 +2,7 @@ package myecomerce.userservice.infrastructure.config;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +20,7 @@ import myecomerce.userservice.application.authService.exception.UnauthorizedExce
 import myecomerce.userservice.application.authService.service.TokenService;
 import myecomerce.userservice.domain.model.UserRole;
 import myecomerce.userservice.domain.repository.RevokedTokenRepository;
+import myecomerce.userservice.infrastructure.common.UserPrincipal;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter{
@@ -51,8 +53,11 @@ public class JwtAuthFilter extends OncePerRequestFilter{
                     throw new UnauthorizedException();
                 }
                         
-                String userId = tokenService.extractUserId(token);
+                UUID userId = UUID.fromString(tokenService.extractUserId(token));
+                String email = tokenService.extractEmail(token);
                 UserRole role = tokenService.extractRole(token);
+
+                var principal = new UserPrincipal(userId, email, role);
 
                 var authorities = List.of(
                         new SimpleGrantedAuthority(
@@ -60,7 +65,7 @@ public class JwtAuthFilter extends OncePerRequestFilter{
                         )
                 );
 
-                var auth = new UsernamePasswordAuthenticationToken(userId, null, authorities);
+                var auth = new UsernamePasswordAuthenticationToken(principal, null, authorities);
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }

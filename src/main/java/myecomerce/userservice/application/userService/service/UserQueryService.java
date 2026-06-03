@@ -11,5 +11,5 @@ public interface UserQueryService {
 
     PaginationResponse<UserResponse> getUsers(GetUsersQuery query);
 
-    GetMeResponse getMe(String query);
+    GetMeResponse getMe();
 }

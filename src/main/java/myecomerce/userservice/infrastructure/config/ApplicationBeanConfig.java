@@ -7,6 +7,7 @@ import myecomerce.userservice.application.authService.service.AuthService;
 import myecomerce.userservice.application.authService.service.AuthServiceImpl;
 import myecomerce.userservice.application.authService.service.PasswordHasher;
 import myecomerce.userservice.application.authService.service.TokenService;
+import myecomerce.userservice.application.common.ICurrentUser;
 import myecomerce.userservice.application.userService.service.UserCommandService;
 import myecomerce.userservice.application.userService.service.UserCommandServiceImpl;
 import myecomerce.userservice.application.userService.service.UserQueryService;
@@ -15,6 +16,7 @@ import myecomerce.userservice.domain.repository.RefreshTokenRepository;
 import myecomerce.userservice.domain.repository.RevokedTokenRepository;
 import myecomerce.userservice.domain.repository.UserRepository;
 import myecomerce.userservice.infrastructure.mapper.IUserMapper;
+import myecomerce.userservice.infrastructure.common.CurrentUserImpl;
 
 @Configuration
 public class ApplicationBeanConfig {
@@ -25,8 +27,8 @@ public class ApplicationBeanConfig {
     }
 
     @Bean
-    public UserQueryService userQueryService(UserRepository userRepository, IUserMapper userMapper) {
-        return new UserQueryServiceImpl(userRepository, userMapper);
+    public UserQueryService userQueryService(UserRepository userRepository, IUserMapper userMapper, ICurrentUser currentUser) {
+        return new UserQueryServiceImpl(userRepository, userMapper, currentUser);
     }
 
     @Bean
@@ -42,5 +44,10 @@ public class ApplicationBeanConfig {
             revokedTokenRepository,
             passwordHasher,
             tokenService);
+    }
+
+    @Bean
+    public ICurrentUser currentUser() {
+        return new CurrentUserImpl();
     }
 }

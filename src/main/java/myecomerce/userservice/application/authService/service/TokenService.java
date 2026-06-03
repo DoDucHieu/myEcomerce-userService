@@ -9,6 +9,7 @@ public interface TokenService {
     String generateRefreshToken(String userId);
     boolean validate(String token);
     String extractUserId(String token);
-    public Instant extractExpiration(String token);
+    String extractEmail(String token);
     UserRole extractRole(String token);
+    public Instant extractExpiration(String token);
 }

@@ -60,7 +60,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal")
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id.toString()")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<UpdateUserResponse> updateUser(
         @Valid @RequestBody UpdateUserRequest req,
@@ -89,7 +89,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal")
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id.toString()")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<UserResponse> getUserById(
         @PathVariable String id,
@@ -110,9 +110,8 @@ public class UserController {
     ) {
         String requestId = RequestContext.getRequestId();
         String code = ErrorCode.SUCCESS;
-        String userId = (String) authentication.getPrincipal();
     
-        GetMeResponse res = userQueryService.getMe(userId);
+        GetMeResponse res = userQueryService.getMe();
 
         return ApiResponse.success("Me fetched successfully", code, requestId, requestId, res, httpRequest.getRequestURI());
 

@@ -2,6 +2,7 @@ package myecomerce.userservice.application.userService.service;
 
 import java.util.UUID;
 
+import myecomerce.userservice.application.common.ICurrentUser;
 import myecomerce.userservice.application.userService.dto.GetMeResponse;
 import myecomerce.userservice.application.userService.dto.PaginationResponse;
 import myecomerce.userservice.application.userService.dto.UserResponse;
@@ -15,10 +16,12 @@ import myecomerce.userservice.domain.repository.UserRepository;
 public class UserQueryServiceImpl implements UserQueryService{
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final ICurrentUser currentUser;
     
-    public UserQueryServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserQueryServiceImpl(UserRepository userRepository, UserMapper userMapper, ICurrentUser currentUser) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.currentUser = currentUser;
     }
 
     
@@ -54,8 +57,9 @@ public class UserQueryServiceImpl implements UserQueryService{
 
 
     @Override
-    public GetMeResponse getMe(String id) {
-        User user = userRepository.findById(UUID.fromString(id))
+    public GetMeResponse getMe() {
+        UUID userId = currentUser.getId();
+        User user = userRepository.findById(userId)
         .orElseThrow(UserNotFoundException::new);
 
         return userMapper.toGetMeResponse(user);

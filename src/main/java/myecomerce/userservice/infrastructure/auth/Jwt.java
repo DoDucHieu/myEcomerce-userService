@@ -118,4 +118,15 @@ public class Jwt implements TokenService{
             .get("role", String.class);
         return UserRole.valueOf(role);
     }
+
+    @Override
+    public String extractEmail(String token) {
+        String email = Jwts.parser()
+            .verifyWith(secretKey)
+            .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("email", String.class);
+        return email;
+    }
 }
