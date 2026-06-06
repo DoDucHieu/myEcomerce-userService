@@ -30,9 +30,15 @@
             http
                     .csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/auth/login",
-                        "/auth/register",
-                        "/auth/refresh").permitAll()
+                            .requestMatchers(
+                                "/auth/login",
+                                            "/auth/register",
+                                            "/auth/refresh",
+                                            "/swagger-ui/**",
+                                            "/v3/api-docs/**",
+                                            "/swagger-ui.html"
+                                        )
+                            .permitAll()
                             .anyRequest().authenticated())
                     .addFilterBefore(
                         jwtAuthFilter,
