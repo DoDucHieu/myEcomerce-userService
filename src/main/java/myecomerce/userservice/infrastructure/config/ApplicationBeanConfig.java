@@ -3,6 +3,8 @@ package myecomerce.userservice.infrastructure.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import myecomerce.userservice.application.auditService.AuditService;
+import myecomerce.userservice.application.auditService.AuditServiceImpl;
 import myecomerce.userservice.application.authService.service.AuthService;
 import myecomerce.userservice.application.authService.service.AuthServiceImpl;
 import myecomerce.userservice.application.authService.service.PasswordHasher;
@@ -12,6 +14,7 @@ import myecomerce.userservice.application.userService.service.UserCommandService
 import myecomerce.userservice.application.userService.service.UserCommandServiceImpl;
 import myecomerce.userservice.application.userService.service.UserQueryService;
 import myecomerce.userservice.application.userService.service.UserQueryServiceImpl;
+import myecomerce.userservice.domain.repository.AuditLogRepository;
 import myecomerce.userservice.domain.repository.RefreshTokenRepository;
 import myecomerce.userservice.domain.repository.RevokedTokenRepository;
 import myecomerce.userservice.domain.repository.UserRepository;
@@ -49,5 +52,10 @@ public class ApplicationBeanConfig {
     @Bean
     public ICurrentUser currentUser() {
         return new CurrentUserImpl();
+    }
+
+    @Bean
+    public AuditService auditService(AuditLogRepository auditLogRepository) {
+        return new AuditServiceImpl(auditLogRepository);
     }
 }
