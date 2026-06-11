@@ -3,14 +3,16 @@ package myecomerce.userservice.application.auditService;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import myecomerce.userservice.application.eventPublisherService.EventPublisherCommand;
+import myecomerce.userservice.application.eventPublisherService.EventPublisherService;
 import myecomerce.userservice.domain.model.AuditLog;
-import myecomerce.userservice.domain.repository.AuditLogRepository;
 
 public class AuditServiceImpl implements AuditService {
-    private final AuditLogRepository auditLogRepository;
+    public static final String AuditQueueName = "audit.log.queue";
+    private final EventPublisherService eventPublisherService;
 
-    public AuditServiceImpl(AuditLogRepository auditLogRepository) {
-        this.auditLogRepository = auditLogRepository;
+    public AuditServiceImpl(EventPublisherService eventPublisherService) {
+        this.eventPublisherService = eventPublisherService;
     }
 
     @Override
@@ -26,7 +28,7 @@ public class AuditServiceImpl implements AuditService {
             command.duration(),
             LocalDateTime.now());
             
-        auditLogRepository.save(auditLog);
+        eventPublisherService.publish(new EventPublisherCommand<AuditLog>(AuditQueueName, auditLog));
     }
     
 }

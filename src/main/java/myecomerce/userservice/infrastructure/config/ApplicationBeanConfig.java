@@ -1,5 +1,6 @@
 package myecomerce.userservice.infrastructure.config;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,15 +11,16 @@ import myecomerce.userservice.application.authService.service.AuthServiceImpl;
 import myecomerce.userservice.application.authService.service.PasswordHasher;
 import myecomerce.userservice.application.authService.service.TokenService;
 import myecomerce.userservice.application.common.ICurrentUser;
+import myecomerce.userservice.application.eventPublisherService.EventPublisherService;
 import myecomerce.userservice.application.userService.service.UserCommandService;
 import myecomerce.userservice.application.userService.service.UserCommandServiceImpl;
 import myecomerce.userservice.application.userService.service.UserQueryService;
 import myecomerce.userservice.application.userService.service.UserQueryServiceImpl;
-import myecomerce.userservice.domain.repository.AuditLogRepository;
 import myecomerce.userservice.domain.repository.RefreshTokenRepository;
 import myecomerce.userservice.domain.repository.RevokedTokenRepository;
 import myecomerce.userservice.domain.repository.UserRepository;
 import myecomerce.userservice.infrastructure.mapper.IUserMapper;
+import myecomerce.userservice.infrastructure.rabbitmq.RabbitMqPublisher;
 import myecomerce.userservice.infrastructure.common.CurrentUserImpl;
 
 @Configuration
@@ -55,7 +57,12 @@ public class ApplicationBeanConfig {
     }
 
     @Bean
-    public AuditService auditService(AuditLogRepository auditLogRepository) {
-        return new AuditServiceImpl(auditLogRepository);
+    public AuditService auditService(EventPublisherService eventPublisherService) {
+        return new AuditServiceImpl(eventPublisherService);
+    }
+
+    @Bean
+    public EventPublisherService eventPublisherService(RabbitTemplate rabbitTemplate) {
+        return new RabbitMqPublisher (rabbitTemplate);
     }
 }
