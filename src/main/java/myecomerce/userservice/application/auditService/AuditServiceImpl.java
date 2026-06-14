@@ -8,7 +8,8 @@ import myecomerce.userservice.application.eventPublisherService.EventPublisherSe
 import myecomerce.userservice.domain.model.AuditLog;
 
 public class AuditServiceImpl implements AuditService {
-    public static final String AuditQueueName = "audit.log.queue";
+    public static final String AuditExchangeName = "audit.exchange";
+    public static final String AuditQueueName = "audit.queue";
     private final EventPublisherService eventPublisherService;
 
     public AuditServiceImpl(EventPublisherService eventPublisherService) {
@@ -28,7 +29,7 @@ public class AuditServiceImpl implements AuditService {
             command.duration(),
             LocalDateTime.now());
             
-        eventPublisherService.publish(new EventPublisherCommand<AuditLog>(AuditQueueName, auditLog));
+        eventPublisherService.publish(new EventPublisherCommand<AuditLog>(AuditExchangeName, AuditQueueName, auditLog));
     }
     
 }

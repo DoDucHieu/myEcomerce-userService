@@ -14,7 +14,6 @@ public class RabbitMqPublisher implements EventPublisherService {
 
     @Override
     public <T> void publish(EventPublisherCommand<T> command) {
-        String queueName = command.queueName();
-        rabbitTemplate.convertAndSend(queueName, command.payload());
+        rabbitTemplate.convertAndSend(command.exchangeName(), command.queueName(), command.payload());
     }
 }
