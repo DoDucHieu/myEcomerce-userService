@@ -25,3 +25,10 @@ spring:
     password: guest
 jwt:
   secret: mysupersecretkeymysupersecretkey88888888
+keycloak:
+  server-url: http://localhost:9090
+  realm: myrealm
+  client-id: myclient
+  client-secret: mysecret
+  redirect-uri: http://localhost:8080/auth/oidc-callback
+  grant-type: authorization_code

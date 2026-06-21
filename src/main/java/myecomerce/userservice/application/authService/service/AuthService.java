@@ -10,6 +10,7 @@ import myecomerce.userservice.application.authService.dto.RegisterResponse;
 public interface AuthService {
     RegisterResponse register(RegisterCommand command);
     LoginResponse login(LoginCommand command);
+    LoginResponse loginWithSSO(String idToken);
     RefreshTokenResponse refresh(String refreshToken);
     void logout(LogoutCommand command);
 }

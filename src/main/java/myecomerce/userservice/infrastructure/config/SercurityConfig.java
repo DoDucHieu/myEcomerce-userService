@@ -34,6 +34,7 @@
                                 "/auth/login",
                                             "/auth/register",
                                             "/auth/refresh",
+                                            "/auth/oidc-callback",
                                             "/swagger-ui/**",
                                             "/v3/api-docs/**",
                                             "/swagger-ui.html"
