@@ -10,6 +10,7 @@ public interface TokenService {
     boolean validate(String token);
     String extractUserId(String token);
     String extractEmail(String token);
+    String extractEmailSSO(String token);
     UserRole extractRole(String token);
     public Instant extractExpiration(String token);
 }

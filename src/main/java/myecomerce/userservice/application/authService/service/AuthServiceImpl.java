@@ -99,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException();
         }
         var userId = UUID.randomUUID();
-        String email = tokenService.extractEmail(idToken);
+        String email = tokenService.extractEmailSSO(idToken);
         UserRole userRole = UserRole.USER;
         String accessToken = tokenService.generateAccessToken(
                 userId.toString(),
