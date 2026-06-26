@@ -23,6 +23,11 @@ spring:
     port: 5672
     username: guest
     password: guest
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/realms/myrealm
 jwt:
   secret: mysupersecretkeymysupersecretkey88888888
 keycloak:
