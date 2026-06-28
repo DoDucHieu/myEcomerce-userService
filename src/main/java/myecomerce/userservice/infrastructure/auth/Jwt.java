@@ -9,7 +9,6 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import myecomerce.userservice.application.authService.service.TokenService;
@@ -121,15 +120,5 @@ public class Jwt implements TokenService {
                                 .getPayload()
                                 .get("email", String.class);
                 return email;
-        }
-
-        @Override
-        public String extractEmailSSO(String idToken) {
-                Claims claims = Jwts.parser()
-                                .build()
-                                .parseSignedClaims(idToken)
-                                .getPayload();
-
-                return claims.get("email", String.class);
         }
 }

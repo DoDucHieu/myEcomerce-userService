@@ -8,6 +8,7 @@ import myecomerce.userservice.application.auditService.AuditService;
 import myecomerce.userservice.application.auditService.AuditServiceImpl;
 import myecomerce.userservice.application.authService.service.AuthService;
 import myecomerce.userservice.application.authService.service.AuthServiceImpl;
+import myecomerce.userservice.application.authService.service.OAuth2TokenService;
 import myecomerce.userservice.application.authService.service.PasswordHasher;
 import myecomerce.userservice.application.authService.service.TokenService;
 import myecomerce.userservice.application.common.ICurrentUser;
@@ -42,13 +43,15 @@ public class ApplicationBeanConfig {
         RefreshTokenRepository refreshTokenRepository,
         RevokedTokenRepository revokedTokenRepository,
         PasswordHasher passwordHasher,
-        TokenService tokenService) {
+        TokenService tokenService,
+        OAuth2TokenService oAuth2TokenService) {
         return new AuthServiceImpl(
             userRepository,
             refreshTokenRepository,
             revokedTokenRepository,
             passwordHasher,
-            tokenService);
+            tokenService,
+            oAuth2TokenService);
     }
 
     @Bean

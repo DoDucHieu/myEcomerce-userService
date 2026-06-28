@@ -31,18 +31,22 @@ public class AuthServiceImpl implements AuthService {
     private final RevokedTokenRepository revokedTokenRepository;
     private final PasswordHasher passwordHasher;
     private final TokenService tokenService;
+    private final OAuth2TokenService oAuth2TokenService;
 
     public AuthServiceImpl(
             UserRepository userRepository,
             RefreshTokenRepository refreshTokenRepository,
             RevokedTokenRepository revokedTokenRepository,
             PasswordHasher passwordHasher,
-            TokenService tokenService) {
+            TokenService tokenService,
+            OAuth2TokenService oAuth2TokenService
+        ) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.revokedTokenRepository = revokedTokenRepository;
         this.passwordHasher = passwordHasher;
         this.tokenService = tokenService;
+        this.oAuth2TokenService = oAuth2TokenService;
     }
 
     @Override
@@ -99,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException();
         }
         var userId = UUID.randomUUID();
-        String email = tokenService.extractEmailSSO(idToken);
+        String email = oAuth2TokenService.extractEmail(idToken);
         UserRole userRole = UserRole.USER;
         String accessToken = tokenService.generateAccessToken(
                 userId.toString(),

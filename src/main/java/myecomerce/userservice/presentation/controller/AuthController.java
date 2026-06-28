@@ -1,6 +1,7 @@
 package myecomerce.userservice.presentation.controller;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
@@ -8,6 +9,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -43,123 +45,148 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    private final AuthService authService;
-    private final KeycloakProperties keycloakProperties;
+        private final AuthService authService;
+        private final KeycloakProperties keycloakProperties;
 
-    public AuthController(AuthService authService, KeycloakProperties keycloakProperties) {
-        this.authService = authService;
-        this.keycloakProperties = keycloakProperties;
-    }
+        public AuthController(AuthService authService, KeycloakProperties keycloakProperties) {
+                this.authService = authService;
+                this.keycloakProperties = keycloakProperties;
+        }
 
-    @PostMapping("/register")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<RegisterResponse> register(@Valid @RequestBody RegisterRequest req,
-            HttpServletRequest httpRequest) {
-        String requestId = RequestContext.getRequestId();
-        String code = ErrorCode.SUCCESS;
-        RegisterCommand command = req.toRegisterCommand();
-        RegisterResponse result = authService.register(command);
-        return ApiResponse.success("User registered successfully", code, requestId, requestId, result,
-                httpRequest.getRequestURI());
-    }
+        @PostMapping("/register")
+        @ResponseStatus(HttpStatus.CREATED)
+        public ApiResponse<RegisterResponse> register(@Valid @RequestBody RegisterRequest req,
+                        HttpServletRequest httpRequest) {
+                String requestId = RequestContext.getRequestId();
+                String code = ErrorCode.SUCCESS;
+                RegisterCommand command = req.toRegisterCommand();
+                RegisterResponse result = authService.register(command);
+                return ApiResponse.success("User registered successfully", code, requestId, requestId, result,
+                                httpRequest.getRequestURI());
+        }
 
-    @PostMapping("/login")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
-        String requestId = RequestContext.getRequestId();
-        String code = ErrorCode.SUCCESS;
-        LoginCommand command = request.toLoginCommand();
+        @PostMapping("/login")
+        @ResponseStatus(HttpStatus.ACCEPTED)
+        public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request,
+                        HttpServletRequest httpRequest) {
+                String requestId = RequestContext.getRequestId();
+                String code = ErrorCode.SUCCESS;
+                LoginCommand command = request.toLoginCommand();
 
-        LoginResponse res = authService.login(command);
+                LoginResponse res = authService.login(command);
 
-        return ApiResponse.success("Login successfully", code, requestId, requestId, res, httpRequest.getRequestURI());
-    }
+                return ApiResponse.success("Login successfully", code, requestId, requestId, res,
+                                httpRequest.getRequestURI());
+        }
 
-    @PostMapping("/refresh")
-    public ApiResponse<RefreshTokenResponse> refresh(
-            @Valid @RequestBody RefreshTokenRequest request,
-            HttpServletRequest httpRequest) {
-        String requestId = RequestContext.getRequestId();
-        String code = ErrorCode.SUCCESS;
-        RefreshTokenResponse res = authService.refresh(request.refreshToken());
-        return ApiResponse.success("Refresh token successfully", code, requestId, requestId, res,
-                httpRequest.getRequestURI());
-    }
+        @PostMapping("/refresh")
+        public ApiResponse<RefreshTokenResponse> refresh(
+                        @Valid @RequestBody RefreshTokenRequest request,
+                        HttpServletRequest httpRequest) {
+                String requestId = RequestContext.getRequestId();
+                String code = ErrorCode.SUCCESS;
+                RefreshTokenResponse res = authService.refresh(request.refreshToken());
+                return ApiResponse.success("Refresh token successfully", code, requestId, requestId, res,
+                                httpRequest.getRequestURI());
+        }
 
-    @PostMapping("/logout")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ApiResponse<Boolean> logout(
-            @RequestHeader("Authorization") String authorization,
+        @PostMapping("/logout")
+        @ResponseStatus(HttpStatus.NO_CONTENT)
+        public ApiResponse<Boolean> logout(
+                        @RequestHeader("Authorization") String authorization,
 
-            @RequestBody LogoutRequest req,
-            HttpServletRequest httpRequest) {
-        String requestId = RequestContext.getRequestId();
-        String code = ErrorCode.SUCCESS;
+                        @RequestBody LogoutRequest req,
+                        HttpServletRequest httpRequest) {
+                String requestId = RequestContext.getRequestId();
+                String code = ErrorCode.SUCCESS;
 
-        String accessToken = authorization
-                .replace(
-                        "Bearer ",
-                        "");
+                String accessToken = authorization
+                                .replace(
+                                                "Bearer ",
+                                                "");
 
-        authService.logout(
+                authService.logout(
 
-                new LogoutCommand(
+                                new LogoutCommand(
 
-                        accessToken,
+                                                accessToken,
 
-                        req.refreshToken()
+                                                req.refreshToken()
 
-                )
+                                )
 
-        );
+                );
 
-        return ApiResponse.success("Revoked token successfully", code, requestId, requestId, true,
-                httpRequest.getRequestURI());
-    }
+                return ApiResponse.success("Revoked token successfully", code, requestId, requestId, true,
+                                httpRequest.getRequestURI());
+        }
 
-    @GetMapping("/oidc-callback")
-    public void oidcCallback(
-            @RequestParam("code") String authCode,
-            HttpServletRequest httpRequest,
-            HttpServletResponse httpResponse) throws IOException {
+        @GetMapping("/oidc-callback")
+        public void oidcCallback(
+                        @RequestParam("code") String authCode,
+                        HttpServletRequest httpRequest,
+                        HttpServletResponse httpResponse) throws IOException {
 
-        String tokenUrl = keycloakProperties.getServerUrl()
-                + "/realms/"
-                + keycloakProperties.getRealm()
-                + "/protocol/openid-connect/token";
+                String tokenUrl = keycloakProperties.getServerUrl()
+                                + "/realms/"
+                                + keycloakProperties.getRealm()
+                                + "/protocol/openid-connect/token";
 
-        RestTemplate restTemplate = new RestTemplate();
+                RestTemplate restTemplate = new RestTemplate();
 
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("code", authCode);
-        formData.add("grant_type", keycloakProperties.getGrantType());
-        formData.add("client_id", keycloakProperties.getClientId());
-        formData.add("client_secret", keycloakProperties.getClientSecret());
-        formData.add("redirect_uri", keycloakProperties.getRedirectUri());
+                MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+                formData.add("code", authCode);
+                formData.add("grant_type", keycloakProperties.getGrantType());
+                formData.add("client_id", keycloakProperties.getClientId());
+                formData.add("client_secret", keycloakProperties.getClientSecret());
+                formData.add("redirect_uri", keycloakProperties.getRedirectUri());
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(formData, headers);
+                HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(formData, headers);
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(tokenUrl, request, Map.class);
+                ResponseEntity<Map> response = restTemplate.postForEntity(tokenUrl, request, Map.class);
 
-        Map<String, Object> tokens = response.getBody();
+                Map<String, Object> tokens = response.getBody();
 
-        String accessToken = (String) tokens.get("access_token");
-        String refreshToken = (String) tokens.get("refresh_token");
-        String idToken = (String) tokens.get("id_token");
+                String accessTokenSSO = (String) tokens.get("access_token");
+                String refreshTokenSSO = (String) tokens.get("refresh_token");
+                String idToken = (String) tokens.get("id_token");
 
-        var loginWithSSOResponse = authService.loginWithSSO(idToken);
+                var loginWithSSOResponse = authService.loginWithSSO(idToken);
 
-        // TODO: Xác thực id_token, tạo session nội bộ (JWT/cookie)
+                var appAccessToken = loginWithSSOResponse.accessToken();
+                var appRefreshToken = loginWithSSOResponse.refreshToken();
 
-        // Ví dụ: trả về thông báo login thành công
+                ResponseCookie accessCookie = ResponseCookie.from("access_token", appAccessToken)
+                                .httpOnly(true)
+                                .secure(false) // localhost is false, production is true
+                                .path("/")
+                                .maxAge(Duration.ofMinutes(15))
+                                .sameSite("Lax")
+                                .build();
 
-        String requestId = RequestContext.getRequestId();
-        String code = ErrorCode.SUCCESS;
+                ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", appRefreshToken)
+                                .httpOnly(true)
+                                .secure(false)
+                                .path("/auth/refresh")
+                                .maxAge(Duration.ofDays(7))
+                                .sameSite("Lax")
+                                .build();
 
-        httpResponse.sendRedirect("http://localhost:3000");
-    }
+                httpResponse.addHeader(
+                                HttpHeaders.SET_COOKIE,
+                                accessCookie.toString());
+                                
+                httpResponse.addHeader(
+                                HttpHeaders.SET_COOKIE,
+                                refreshCookie.toString());
+
+                String requestId = RequestContext.getRequestId();
+                String code = ErrorCode.SUCCESS;
+
+                httpResponse.sendRedirect("http://localhost:3000");
+        }
 
 }
