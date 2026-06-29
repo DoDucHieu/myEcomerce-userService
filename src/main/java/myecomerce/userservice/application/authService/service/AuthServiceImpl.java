@@ -1,8 +1,9 @@
 package myecomerce.userservice.application.authService.service;
 
-import java.time.Instant;
-import java.util.UUID;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
 
 import myecomerce.userservice.application.annotationCustom.CommandUseCase;
 import myecomerce.userservice.application.authService.command.LoginCommand;
@@ -12,7 +13,6 @@ import myecomerce.userservice.application.authService.dto.LoginResponse;
 import myecomerce.userservice.application.authService.dto.RefreshTokenResponse;
 import myecomerce.userservice.application.authService.dto.RegisterResponse;
 import myecomerce.userservice.application.authService.exception.InvalidTokenException;
-import myecomerce.userservice.application.authService.exception.UnauthorizedException;
 import myecomerce.userservice.application.userService.exception.EmailAlreadyExistsException;
 import myecomerce.userservice.application.userService.exception.InvalidEmailOrPasswordException;
 import myecomerce.userservice.application.userService.exception.UserNotFoundException;
@@ -26,156 +26,165 @@ import myecomerce.userservice.domain.repository.UserRepository;
 @CommandUseCase
 public class AuthServiceImpl implements AuthService {
 
-    private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final RevokedTokenRepository revokedTokenRepository;
-    private final PasswordHasher passwordHasher;
-    private final TokenService tokenService;
-    private final OAuth2TokenService oAuth2TokenService;
+        private final UserRepository userRepository;
+        private final RefreshTokenRepository refreshTokenRepository;
+        private final RevokedTokenRepository revokedTokenRepository;
+        private final PasswordHasher passwordHasher;
+        private final TokenService tokenService;
+        private final OAuth2TokenService oAuth2TokenService;
 
-    public AuthServiceImpl(
-            UserRepository userRepository,
-            RefreshTokenRepository refreshTokenRepository,
-            RevokedTokenRepository revokedTokenRepository,
-            PasswordHasher passwordHasher,
-            TokenService tokenService,
-            OAuth2TokenService oAuth2TokenService
-        ) {
-        this.userRepository = userRepository;
-        this.refreshTokenRepository = refreshTokenRepository;
-        this.revokedTokenRepository = revokedTokenRepository;
-        this.passwordHasher = passwordHasher;
-        this.tokenService = tokenService;
-        this.oAuth2TokenService = oAuth2TokenService;
-    }
-
-    @Override
-    public RegisterResponse register(RegisterCommand command) {
-        userRepository.findByEmail(command.email()).ifPresent(user -> {
-            throw new EmailAlreadyExistsException();
-        });
-
-        var hashPassword = passwordHasher.hash(command.password());
-        User newUser = User.create(command.email(), command.name(), hashPassword);
-        User saved = userRepository.save(newUser);
-
-        return new RegisterResponse(
-                saved.getId().toString(),
-                saved.getEmail(),
-                saved.getName(),
-                saved.getRole());
-    }
-
-    @Override
-    public LoginResponse login(LoginCommand command) {
-        User user = userRepository.findByEmail(command.email())
-                .orElseThrow(() -> new InvalidEmailOrPasswordException());
-
-        boolean matches = passwordHasher.matches(
-                command.password(),
-                user.getPasswordHash());
-
-        if (!matches) {
-            throw new InvalidEmailOrPasswordException();
+        public AuthServiceImpl(
+                        UserRepository userRepository,
+                        RefreshTokenRepository refreshTokenRepository,
+                        RevokedTokenRepository revokedTokenRepository,
+                        PasswordHasher passwordHasher,
+                        TokenService tokenService,
+                        OAuth2TokenService oAuth2TokenService) {
+                this.userRepository = userRepository;
+                this.refreshTokenRepository = refreshTokenRepository;
+                this.revokedTokenRepository = revokedTokenRepository;
+                this.passwordHasher = passwordHasher;
+                this.tokenService = tokenService;
+                this.oAuth2TokenService = oAuth2TokenService;
         }
 
-        String accessToken = tokenService.generateAccessToken(
-                user.getId().toString(),
-                user.getEmail(),
-                user.getRole());
+        @Override
+        public RegisterResponse register(RegisterCommand command) {
+                userRepository.findByEmail(command.email()).ifPresent(user -> {
+                        throw new EmailAlreadyExistsException();
+                });
 
-        String refreshToken = tokenService.generateRefreshToken(user.getId().toString());
+                var hashPassword = passwordHasher.hash(command.password());
+                User newUser = User.create(command.email(), command.name(), hashPassword);
+                User saved = userRepository.save(newUser);
 
-        refreshTokenRepository.save(new RefreshToken(
-                UUID.randomUUID(),
-                user.getId(),
-                refreshToken,
-                Instant.now()
-                        .plus(Duration.ofDays(30))));
-
-        return new LoginResponse(accessToken, refreshToken);
-    }
-
-    @Override
-    public LoginResponse loginWithSSO(String idToken) {
-        var tokenRevoked = revokedTokenRepository.exists(idToken);
-        if (tokenRevoked) {
-            throw new UnauthorizedException();
-        }
-        var userId = UUID.randomUUID();
-        String email = oAuth2TokenService.extractEmail(idToken);
-        UserRole userRole = UserRole.USER;
-        String accessToken = tokenService.generateAccessToken(
-                userId.toString(),
-                email,
-                userRole);
-
-        String refreshToken = tokenService.generateRefreshToken(userId.toString());
-
-        refreshTokenRepository.save(new RefreshToken(
-                UUID.randomUUID(),
-                userId,
-                refreshToken,
-                Instant.now()
-                        .plus(Duration.ofDays(30))));
-
-        return new LoginResponse(accessToken, refreshToken);
-    }
-
-    @Override
-    public RefreshTokenResponse refresh(String refreshToken) {
-        RefreshToken stored = refreshTokenRepository
-                .findByToken(
-                        refreshToken)
-
-                .orElseThrow(
-                        InvalidTokenException::new);
-
-        if (stored.expired()) {
-            refreshTokenRepository.delete(refreshToken);
-            throw new InvalidTokenException();
+                return new RegisterResponse(
+                                saved.getId().toString(),
+                                saved.getEmail(),
+                                saved.getName(),
+                                saved.getRole());
         }
 
-        User user = userRepository
-                .findById(
-                        stored.getUserId())
-                .orElseThrow(
-                        UserNotFoundException::new);
+        @Override
+        public LoginResponse login(LoginCommand command) {
+                User user = userRepository.findByEmail(command.email())
+                                .orElseThrow(() -> new InvalidEmailOrPasswordException());
 
-        String accessToken = tokenService.generateAccessToken(
-                user.getId()
-                        .toString(),
+                boolean matches = passwordHasher.matches(
+                                command.password(),
+                                user.getPasswordHash());
 
-                user.getEmail(),
-                user.getRole());
+                if (!matches) {
+                        throw new InvalidEmailOrPasswordException();
+                }
 
-        String newRefreshToken = tokenService.generateRefreshToken(user.getId().toString());
+                String accessToken = tokenService.generateAccessToken(
+                                user.getId().toString(),
+                                user.getEmail(),
+                                user.getRole());
 
-        refreshTokenRepository.delete(refreshToken);
+                String refreshToken = tokenService.generateRefreshToken(user.getId().toString());
 
-        refreshTokenRepository.save(new RefreshToken(
+                refreshTokenRepository.save(new RefreshToken(
+                                UUID.randomUUID(),
+                                user.getId(),
+                                refreshToken,
+                                Instant.now()
+                                                .plus(Duration.ofDays(30))));
 
-                UUID.randomUUID(),
+                return new LoginResponse(accessToken, refreshToken);
+        }
 
-                user.getId(),
+        @Override
+        public LoginResponse loginWithSSO(String idToken) {
 
-                newRefreshToken,
+                var userId = oAuth2TokenService.extractUserId(idToken);
 
-                Instant.now()
-                        .plus(Duration.ofDays(30))));
-        ;
+                Optional<User> optionalUser = userRepository.findById(userId);
 
-        return new RefreshTokenResponse(
-                accessToken,
-                newRefreshToken);
-    }
+                User user;
 
-    @Override
-    public void logout(LogoutCommand command) {
-        revokedTokenRepository.save(
-                command.accessToken());
+                if (optionalUser.isPresent()) {
+                        user = optionalUser.get();
+                } else {
+                        String email = oAuth2TokenService.extractEmail(idToken);
+                        UserRole userRole = UserRole.USER;
+                        String userName = oAuth2TokenService.extractUserName(idToken);
+                        user = new User(userId, email, userName, "", userRole);
+                        user = userRepository.save(user);
+                }
 
-        refreshTokenRepository.delete(
-                command.refreshToken());
-    }
+                String accessToken = tokenService.generateAccessToken(
+                                user.getId().toString(),
+                                user.getEmail(),
+                                user.getRole());
+
+                String refreshToken = tokenService.generateRefreshToken(user.getId().toString());
+
+                refreshTokenRepository.save(new RefreshToken(
+                                UUID.randomUUID(),
+                                userId,
+                                refreshToken,
+                                Instant.now()
+                                                .plus(Duration.ofDays(30))));
+
+                return new LoginResponse(accessToken, refreshToken);
+        }
+
+        @Override
+        public RefreshTokenResponse refresh(String refreshToken) {
+                RefreshToken stored = refreshTokenRepository
+                                .findByToken(
+                                                refreshToken)
+
+                                .orElseThrow(
+                                                InvalidTokenException::new);
+
+                if (stored.expired()) {
+                        refreshTokenRepository.delete(refreshToken);
+                        throw new InvalidTokenException();
+                }
+
+                User user = userRepository
+                                .findById(
+                                                stored.getUserId())
+                                .orElseThrow(
+                                                UserNotFoundException::new);
+
+                String accessToken = tokenService.generateAccessToken(
+                                user.getId()
+                                                .toString(),
+
+                                user.getEmail(),
+                                user.getRole());
+
+                String newRefreshToken = tokenService.generateRefreshToken(user.getId().toString());
+
+                refreshTokenRepository.delete(refreshToken);
+
+                refreshTokenRepository.save(new RefreshToken(
+
+                                UUID.randomUUID(),
+
+                                user.getId(),
+
+                                newRefreshToken,
+
+                                Instant.now()
+                                                .plus(Duration.ofDays(30))));
+                ;
+
+                return new RefreshTokenResponse(
+                                accessToken,
+                                newRefreshToken);
+        }
+
+        @Override
+        public void logout(LogoutCommand command) {
+                revokedTokenRepository.save(
+                                command.accessToken());
+
+                refreshTokenRepository.delete(
+                                command.refreshToken());
+        }
 }
