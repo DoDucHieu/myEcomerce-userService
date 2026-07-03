@@ -19,21 +19,21 @@ spring:
           time_zone: UTC
         format_sql: true
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:9090/realms/myrealm
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:9090/realms/myrealm}
 jwt:
-  secret: mysupersecretkeymysupersecretkey88888888
+  secret: ${JWT_SECRET:mysupersecretkeymysupersecretkey88888888}
 keycloak:
-  server-url: http://localhost:9090
-  realm: myrealm
-  client-id: myclient
-  client-secret: mysecret
-  redirect-uri: http://localhost:8080/auth/oidc-callback
+  server-url: ${KEYCLOAK_SERVER_URL:http://localhost:9090}
+  realm: ${KEYCLOAK_REALM:myrealm}
+  client-id: ${KEYCLOAK_CLIENT_ID:myclient}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:mysecret}
+  redirect-uri: ${KEYCLOAK_REDIRECT_URI:http://localhost:8080/auth/oidc-callback}
   grant-type: authorization_code
