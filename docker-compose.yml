@@ -54,6 +54,7 @@ services:
     depends_on:
       - postgres
       - rabbitmq
+      - keycloak
 
     ports:
       - "8080:8080"
