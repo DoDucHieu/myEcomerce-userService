@@ -126,12 +126,10 @@ public class AuthController {
                         @RequestParam("code") String authCode,
                         HttpServletRequest httpRequest,
                         HttpServletResponse httpResponse) throws IOException {
-                System.out.println("=== STEP 1 ===");
                 String tokenUrl = keycloakProperties.getServerUrl()
                                 + "/realms/"
                                 + keycloakProperties.getRealm()
                                 + "/protocol/openid-connect/token";
-                System.out.println("=== STEP 2 ===");
                 RestTemplate restTemplate = new RestTemplate();
 
                 MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
@@ -147,7 +145,6 @@ public class AuthController {
                 HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(formData, headers);
 
                 try {
-                        System.out.println("=== STEP 3 ===");
                         ResponseEntity<Map> response = restTemplate.postForEntity(tokenUrl, request, Map.class);
 
                         Map<String, Object> tokens = response.getBody();
@@ -155,7 +152,6 @@ public class AuthController {
                         String accessTokenSSO = (String) tokens.get("access_token");
                         String refreshTokenSSO = (String) tokens.get("refresh_token");
                         String idToken = (String) tokens.get("id_token");
-                        System.out.println("=== ID TOKEN: " + idToken);
 
                         var loginWithSSOResponse = authService.loginWithSSO(idToken);
 
@@ -191,17 +187,6 @@ public class AuthController {
 
                         httpResponse.sendRedirect("http://localhost:3000");
                 } catch (Exception ex) {
-                        System.out.println("=================================");
-                        System.out.println("Exception class: " + ex.getClass().getName());
-                        System.out.println("Message: " + ex.getMessage());
-
-                        Throwable t = ex;
-                        while (t != null) {
-                                System.out.println("CAUSE: " + t.getClass().getName());
-                                System.out.println("MESSAGE: " + t.getMessage());
-                                t = t.getCause();
-                        }
-
                         throw ex;
                 }
         }

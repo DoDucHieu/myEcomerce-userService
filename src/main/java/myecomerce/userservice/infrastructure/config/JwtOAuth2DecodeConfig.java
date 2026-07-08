@@ -13,7 +13,6 @@ public class JwtOAuth2DecodeConfig {
     
     @Bean
     public JwtDecoder keycloakJwtDecoder() {
-        System.out.println("issuerUri = " + issuerUri);
         return JwtDecoders.fromIssuerLocation(issuerUri);
     }
 }
