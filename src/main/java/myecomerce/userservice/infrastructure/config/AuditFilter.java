@@ -31,12 +31,15 @@ public class AuditFilter extends OncePerRequestFilter{
         throws ServletException, IOException {
             long start = System.currentTimeMillis();
             try{
+                System.out.println("TRY AUDIT FILTER");
                 filterChain.doFilter(request, response);
             }
             catch (Exception ex) {
+                System.out.println("CATCH AUDIT FILTER" + ex.getMessage());
                 throw ex;
             }
             finally{
+                System.out.println("FINALLY AUDIT FILTER");
                 long duration = System.currentTimeMillis() - start;
                 String userId = "anonymous";
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
