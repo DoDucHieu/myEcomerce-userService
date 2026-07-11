@@ -9,4 +9,6 @@ public interface UserCommandService {
     CreateUserResponse createUser(CreateUserCommand req);
     
     UpdateUserResponse updateUser(UpdateUserCommand req);
+
+    void deleteUser(String id);
 }

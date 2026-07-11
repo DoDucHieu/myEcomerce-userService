@@ -3,6 +3,7 @@ package myecomerce.userservice.presentation.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -72,6 +73,13 @@ public class UserController {
         var command = new UpdateUserCommand(id, req.email(), req.name()); 
         var result = userCommandService.updateUser(command);
         return ApiResponse.success("User updated successfully", code, requestId, requestId, result, httpRequest.getRequestURI());
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable String id) {
+        userCommandService.deleteUser(id);
     }
 
     @GetMapping

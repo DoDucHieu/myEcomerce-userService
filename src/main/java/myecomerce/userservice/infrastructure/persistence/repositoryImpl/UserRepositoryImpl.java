@@ -66,4 +66,9 @@ public class UserRepositoryImpl implements UserRepository {
 
         return users;
     }
+
+    @Override
+    public void deleteById(UUID id) {
+        jpaRepository.deleteById(id);
+    }
 }

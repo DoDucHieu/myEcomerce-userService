@@ -52,4 +52,11 @@ public class UserCommandServiceImpl implements UserCommandService {
 
         return userMapper.toUpdateUserResponse(updatedUser);
     }
+
+    @Override
+    public void deleteUser(String id) {
+        UUID userId = UUID.fromString(id);
+        userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        userRepository.deleteById(userId);
+    }
 }
