@@ -28,8 +28,8 @@ import myecomerce.userservice.infrastructure.common.CurrentUserImpl;
 public class ApplicationBeanConfig {
 
     @Bean
-    public UserCommandService userCommandService(UserRepository userRepository, IUserMapper userMapper) {
-        return new UserCommandServiceImpl(userRepository, userMapper);
+    public UserCommandService userCommandService(UserRepository userRepository, IUserMapper userMapper, PasswordHasher passwordHasher) {
+        return new UserCommandServiceImpl(userRepository, userMapper, passwordHasher);
     }
 
     @Bean

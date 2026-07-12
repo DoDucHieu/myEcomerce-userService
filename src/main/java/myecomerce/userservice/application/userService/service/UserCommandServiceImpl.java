@@ -1,6 +1,9 @@
 package myecomerce.userservice.application.userService.service;
 
 import java.util.UUID;
+
+import myecomerce.userservice.application.authService.dto.RegisterResponse;
+import myecomerce.userservice.application.authService.service.PasswordHasher;
 import myecomerce.userservice.application.userService.command.CreateUserCommand;
 import myecomerce.userservice.application.userService.command.UpdateUserCommand;
 import myecomerce.userservice.application.userService.dto.CreateUserResponse;
@@ -12,13 +15,15 @@ import myecomerce.userservice.domain.model.User;
 import myecomerce.userservice.domain.repository.UserRepository;
 
 public class UserCommandServiceImpl implements UserCommandService {
- 
+
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordHasher passwordHasher;
 
-    public UserCommandServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserCommandServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordHasher passwordHasher) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.passwordHasher = passwordHasher;
     }
 
     @Override
@@ -27,12 +32,15 @@ public class UserCommandServiceImpl implements UserCommandService {
             throw new EmailAlreadyExistsException();
         });
 
-        User newUser = User.create(req.email(), req.name(), req.passwordHash());
+        var hashPassword = passwordHasher.hash(req.password());
+        User newUser = User.create(req.email(), req.name(), hashPassword);
         User saved = userRepository.save(newUser);
+
         return new CreateUserResponse(
                 saved.getId(),
                 saved.getEmail(),
-                saved.getName());
+                saved.getName(),
+                saved.getRole());
     }
 
     @Override
