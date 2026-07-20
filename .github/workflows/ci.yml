@@ -24,6 +24,12 @@ jobs:
 
       - name: Build project
         run: ./mvnw clean package -DskipTests
+      
+      - name: Show current directory
+        run: |
+          pwd
+          ls -la
+          ls -la target
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
